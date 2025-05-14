@@ -116,7 +116,7 @@
   <script>
     async function fetchUser(userId) {
   try {
-    const proxyUrl = `https://corsproxy.io/?https://users.roblox.com/v1/users/${userId}`;
+    const res = await fetch(`/.netlify/functions/roblox?userId=${userId}`);
     const res = await fetch(proxyUrl);
     const data = await res.json();
     if (data.errors) return null;
