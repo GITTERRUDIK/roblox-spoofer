@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Roblox Random Player Spoofer</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: url('https://www.transparenttextures.com/patterns/stardust.png'), #1a2a44;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .container {
+      display: flex;
+      background: rgba(26, 42, 68, 0.9);
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    }
+    .avatar-section {
+      margin-right: 20px;
+    }
+    .avatar {
+      width: 150px;
+      height: 200px;
+      background: #ccc;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+    .avatar img {
+      max-width: 100%;
+      max-height: 100%;
+      border-radius: 10px;
+    }
+    .player-info {
+      font-size: 14px;
+      color: #ddd;
+    }
+    .search-section {
+      flex-grow: 1;
+    }
+    .filters {
+      margin-bottom: 20px;
+    }
+    .filter-item {
+      margin: 10px 0;
+    }
+    .filter-item label {
+      margin-right: 10px;
+    }
+    .search-button {
+      background: #007bff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 20px;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .search-button:hover {
+      background: #0056b3;
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .error {
+      color: #ff4444;
+      font-size: 12px;
+      display: none;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="avatar-section">
+      <h1>Roblox Random Player Spoofer</h1>
+      <div class="avatar" id="avatarBox">Player Avatar Here</div>
+      <div class="player-info" id="playerInfo">DisplayName<br>@username</div>
+      <div class="error" id="errorMsg"></div>
+    </div>
+    <div class="search-section">
+      <div class="filters">
+        <div class="filter-item">
+          <label>Has Donate Inventory:</label>
+          <input type="checkbox" id="donate">
+        </div>
+        <div class="filter-item">
+          <label>Has Skin:</label>
+          <input type="checkbox" id="skin">
+        </div>
+        <div class="filter-item">
+          <label>Min Level:</label>
+          <input type="number" id="minLevel" min="1" placeholder="1">
+        </div>
+        <div class="filter-item">
+          <label>Max Join Date:</label>
+          <input type="date" id="maxJoinDate" max="2025-05-14">
+        </div>
+      </div>
+      <button class="search-button" onclick="searchPlayers()">Search</button>
+    </div>
+  </div>
+
+  <script>
+    async function fetchUser(userId) {
+      try {
+        const res = await fetch(`https://users.roblox.com/v1/users/${userId}`);
+        if (!res.ok) return null;
+        return await res.json();
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function getAvatarUrl(userId) {
+      return `https://www.roblox.com/headshot-thumbnail/image?userId=${userId}&width=420&height=420&format=png`;
+    }
+
+    async function searchPlayers() {
+      const errorMsg = document.getElementById('errorMsg');
+      errorMsg.style.display = 'none';
+
+      let found = false;
+      let attempts = 0;
+
+      while (!found && attempts < 30) {
+        const randomId = Math.floor(Math.random() * 2000000000); // Random Roblox ID
+        const user = await fetchUser(randomId);
+        if (!user || user.isBanned || !user.displayName) {
+          attempts++;
+          continue;
+        }
+
+        // Show on UI
+        document.getElementById("avatarBox").innerHTML = `<img src="${getAvatarUrl(user.id)}" alt="avatar">`;
+        document.getElementById("playerInfo").innerHTML = `${user.displayName}<br>@${user.name}`;
+        found = true;
+      }
+
+      if (!found) {
+        errorMsg.textContent = "Couldn't find a valid user. Try again.";
+        errorMsg.style.display = 'block';
+      }
+    }
+  </script>
+</body>
+</html>
