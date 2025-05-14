@@ -115,14 +115,16 @@
 
   <script>
     async function fetchUser(userId) {
-      try {
-        const res = await fetch(`https://users.roblox.com/v1/users/${userId}`);
-        if (!res.ok) return null;
-        return await res.json();
-      } catch (e) {
-        return null;
-      }
-    }
+  try {
+    const res = await fetch(`https://users.roblox.com/v1/users/${userId}`);
+    const data = await res.json();
+    if (data.errors) return null; // <--- вот этот фикс
+    return data;
+  } catch (e) {
+    return null;
+  }
+}
+
 
     function getAvatarUrl(userId) {
       return `https://www.roblox.com/headshot-thumbnail/image?userId=${userId}&width=420&height=420&format=png`;
