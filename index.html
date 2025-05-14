@@ -25,25 +25,39 @@
     }
     .avatar-section {
       margin-right: 20px;
+      text-align: center;
     }
     .avatar {
       width: 150px;
       height: 200px;
-      background: #ccc;
+      background: #333;
       border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
       margin-bottom: 10px;
+      overflow: hidden;
+      position: relative;
     }
     .avatar img {
-      max-width: 100%;
-      max-height: 100%;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
       border-radius: 10px;
+    }
+    .avatar .loading {
+      display: none;
+      font-size: 12px;
+      color: #aaa;
+    }
+    .avatar.loading .loading {
+      display: block;
     }
     .player-info {
       font-size: 14px;
       color: #ddd;
+      max-width: 150px;
+      word-wrap: break-word;
     }
     .search-section {
       flex-grow: 1;
@@ -86,7 +100,10 @@
   <div class="container">
     <div class="avatar-section">
       <h1>Roblox Random Player Spoofer</h1>
-      <div class="avatar" id="avatarBox">Player Avatar Here</div>
+      <div class="avatar" id="avatarBox">
+        <span class="loading">Loading...</span>
+        Player Avatar Here
+      </div>
       <div class="player-info" id="playerInfo">DisplayName<br>@username</div>
       <div class="error" id="errorMsg"></div>
     </div>
@@ -130,15 +147,23 @@
       }
     }
 
-    // Get avatar URL
+    // Get avatar URL (using full-body avatar for better spoofing)
     function getAvatarUrl(userId) {
-      return `https://www.roblox.com/headshot-thumbnail/image?userId=${userId}&width=420&height=420&format=png`;
+      return `https://thumbnails.roblox.com/v1/users/avatar?userIds=${userId}&size=250x250&format=Png&isCircular=false`;
+    }
+
+    // Fallback avatar if image fails to load
+    function getFallbackAvatarUrl() {
+      return 'https://www.roblox.com/asset-thumbnail/image?assetId=0&width=250&height=250&format=png';
     }
 
     // Search for players
     async function searchPlayers() {
       const errorMsg = document.getElementById('errorMsg');
+      const avatarBox = document.getElementById('avatarBox');
       errorMsg.style.display = 'none';
+      avatarBox.classList.add('loading');
+      avatarBox.innerHTML = '<span class="loading">Loading...</span>';
 
       let found = false;
       let attempts = 0;
@@ -153,12 +178,22 @@
         }
 
         // Update UI with user data
-        document.getElementById('avatarBox').innerHTML = `<img src="${getAvatarUrl(user.id)}" alt="avatar">`;
+        const avatarImg = document.createElement('img');
+        avatarImg.src = getAvatarUrl(user.id);
+        avatarImg.alt = `${user.displayName}'s avatar`;
+        avatarImg.onerror = () => {
+          avatarImg.src = getFallbackAvatarUrl(); // Fallback if avatar fails
+        };
+        avatarBox.classList.remove('loading');
+        avatarBox.innerHTML = '';
+        avatarBox.appendChild(avatarImg);
         document.getElementById('playerInfo').innerHTML = `${user.displayName}<br>@${user.name}`;
         found = true;
       }
 
       if (!found) {
+        avatarBox.classList.remove('loading');
+        avatarBox.innerHTML = '<span>Player Avatar Here</span>';
         errorMsg.textContent = "Couldn't find a valid user. Try again.";
         errorMsg.style.display = 'block';
       }
