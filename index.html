@@ -117,7 +117,6 @@
     async function fetchUser(userId) {
   try {
     const res = await fetch(`/.netlify/functions/roblox?userId=${userId}`);
-    const res = await fetch(proxyUrl);
     const data = await res.json();
     if (data.errors) return null;
     return data;
