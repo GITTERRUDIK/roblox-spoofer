@@ -117,14 +117,15 @@
     async function fetchUser(userId) {
   try {
     const proxyUrl = `https://corsproxy.io/?https://users.roblox.com/v1/users/${userId}`;
-const res = await fetch(proxyUrl);
+    const res = await fetch(proxyUrl);
     const data = await res.json();
-    if (data.errors) return null; // <--- вот этот фикс
+    if (data.errors) return null;
     return data;
   } catch (e) {
     return null;
   }
 }
+
 
 
     function getAvatarUrl(userId) {
