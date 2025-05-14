@@ -109,36 +109,42 @@
           <input type="date" id="maxJoinDate" max="2025-05-14">
         </div>
       </div>
-      <button class="search-button" onclick="searchPlayers()">Search</button>
+      <button class="search-button" id="searchButton">Search</button>
     </div>
   </div>
 
   <script>
+    // Fetch user data from Netlify function
     async function fetchUser(userId) {
-  try {
-    const res = await fetch(`/.netlify/functions/roblox?userId=${userId}`);
-    const data = await res.json();
-    if (data.errors) return null;
-    return data;
-  } catch (e) {
-    return null;
-  }
-}
+      try {
+        const response = await fetch(`/.netlify/functions/roblox?userId=${userId}`);
+        const data = await response.json();
+        if (data.error || data.errors) {
+          console.error('Error fetching user:', data.error || data.errors);
+          return null;
+        }
+        return data;
+      } catch (error) {
+        console.error('Fetch error:', error);
+        return null;
+      }
+    }
 
-
-
+    // Get avatar URL
     function getAvatarUrl(userId) {
       return `https://www.roblox.com/headshot-thumbnail/image?userId=${userId}&width=420&height=420&format=png`;
     }
 
+    // Search for players
     async function searchPlayers() {
       const errorMsg = document.getElementById('errorMsg');
       errorMsg.style.display = 'none';
 
       let found = false;
       let attempts = 0;
+      const maxAttempts = 30;
 
-      while (!found && attempts < 30) {
+      while (!found && attempts < maxAttempts) {
         const randomId = Math.floor(Math.random() * 2000000000); // Random Roblox ID
         const user = await fetchUser(randomId);
         if (!user || user.isBanned || !user.displayName) {
@@ -146,9 +152,9 @@
           continue;
         }
 
-        // Show on UI
-        document.getElementById("avatarBox").innerHTML = `<img src="${getAvatarUrl(user.id)}" alt="avatar">`;
-        document.getElementById("playerInfo").innerHTML = `${user.displayName}<br>@${user.name}`;
+        // Update UI with user data
+        document.getElementById('avatarBox').innerHTML = `<img src="${getAvatarUrl(user.id)}" alt="avatar">`;
+        document.getElementById('playerInfo').innerHTML = `${user.displayName}<br>@${user.name}`;
         found = true;
       }
 
@@ -157,6 +163,9 @@
         errorMsg.style.display = 'block';
       }
     }
+
+    // Add event listener to the search button
+    document.getElementById('searchButton').addEventListener('click', searchPlayers);
   </script>
 </body>
 </html>
